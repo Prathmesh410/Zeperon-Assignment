@@ -1,4 +1,4 @@
-const User = require("../Models/user");
+const User = require("../models/user");
 const { check,validationResult } = require('express-validator');
 var jwt = require('jsonwebtoken');
 var expressJwt = require('express-jwt');
@@ -48,14 +48,10 @@ exports.signin = (req, res) => {
         });
       }
   
-      //create token
       const token = jwt.sign({ _id: user._id },process.env.SECRET);
-      //put token in cookie
       res.cookie("token", token, { expire: new Date() + 9999 });
-  
-      //send response to front end
-      const { _id, name, email, role } = user;
-      return res.json({ token, user: { _id, name, email, role } });
+      const { _id, name } = user;
+      return res.json({ token, user: { _id, name } });
     });
   };
   
@@ -73,23 +69,4 @@ exports.isSignedIn =  expressJwt({
   userProperty : "auth"
 });
 
-// coustom middlewares
-exports.isAuthenticated = (req,res,next) => {
-  let cheaker = req.profile && req.auth && req.profile._id == req.auth._id;
-  if(!cheaker){
-   return res.status(403).json({
-      error : "access denied"
-    });
-  }
-  next()
-};
 
-
-exports.isAdmin = (req,res,next) => {
-    if(req.profile.role === 0){
-      res.status(403).json({
-        error : "kon aa tu chal pal"
-      });
-    }
-  next()
-};
